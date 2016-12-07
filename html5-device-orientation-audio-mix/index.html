@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>peteredhead.github.io</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Patrick+Hand" rel="stylesheet">
+    <style>
+        /* Page Stuff */
+        
+        h1 {
+            font-family: 'Patrick Hand', cursive;
+        }
+        
+        h4 {
+            font-family: 'Patrick Hand', cursive;
+        }
+        img {
+            padding-bottom: 1em;
+        }
+        /* Example 1 Stuff */
+        
+        #viewer {
+            width: 200px;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #container {
+            position: relative;
+            color: white;
+            font-family: helvetica, arial;
+            font-weight: bold;
+            text-shadow: 1px 1px #666;
+            text-align: center;
+            width: 1000px;
+            height: 200px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .square {
+            width: 200px;
+            height: 200px;
+            display: inline-block;
+            margin: 0;
+            padding-top: 80px;
+        }
+        
+        .first {
+            background-color: red;
+        }
+        
+        .second {
+            background-color: yellow;
+        }
+        
+        .third {
+            background-color: green;
+        }
+        
+        .fourth {
+            background-color: blue;
+        }
+    </style>
+    <script>
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener("deviceorientation", deviceOrientationListener);
+        }
+        else {
+            alert("Sorry, your browser doesn't support Device Orientation");
+        }
+
+        function deviceOrientationListener(event) {
+            var alpha = event.alpha;
+            move(alpha);
+        }
+
+        function move(value) {
+            var container = document.getElementById("container");
+            var right = 800 - (value / 360) * 800;
+            container.style.right = right + "px";
+        }
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-inverse">
+        <a class="navbar-brand" href="#">peteredhead.github.io</a>
+    </nav>
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="display-3">Mixing Audio with Device Orientation</h1>
+            <p>Using the HTML5 Device Orientation API to Mix Audio Sources.</p>
+        </div>
+    </div>
+    <div class="container">
+        <h4>Background</h4>
+        <p>Recently I’ve been doing a lot of work with 360 video. One of the things that really makes 360 work well on mobile devices is the ability to use the device’s gyroscopes to automatically adjust the orientation of the video. This got me thinking
+            of other applications for this technology.</p>
+        <p>Given that I’m more from a sound background, than video, I decided to investigate how the orientation of the device could be used to mix different audio sources. Using my old <a href="https://www.youtube.com/watch?v=3AOJdajG6w8" target="_blank">ukulele, double-bass and cajon cover of Get Lucky</a>            as a source, I’m going to allow the user to hear each instrument in turn or the whole mix depending on which direction the device is facing.</p>
+        <p>For those of you who just want to see the finished code, it's here.</p>
+        <h4>HTML5 - Device Orientation</h4>
+        <p>Determining which direction a phone or tablet is facing is ridiculously easy in HTML5. The Device Orientation event is triggered whenever the accelerometer detects movement. By registering a function as a listener to this event, we can get updated
+            every time the device orientation changes.</p>
+        <p>There are four values obtained from the event:</p>
+        <ul>
+            <li><em>Absolute</em> - specifies what data is in reference to. This is beyond the scope of what we need for this application.</li>
+            <li><em>Alpha</em> - rotation around the centre of the screen.</li>
+            <li><em>Beta</em> - how much the device is tipped forwards or backwards.</li>
+            <li><em>Gamma</em> - the angle by which the device is turned left or right.</li>
+        </ul>
+        <p>For the scenario I have in mind, alpha is the property that is of interest here. If the user holds the device up and turns around to face different directions, this is the value that needs to be captured.</p>
+        <p>As a proof of concept, I’ve put together a quick test function which changes the positioning of an element depending on the alpha value returned from the device orientation event. The value of the angle is used to horizontally shift a DIV of five
+            squares, representing the three instruments and the complete mix (with the latter repeated so that the div scrolls around seamlessly).</p>
+        <script src="https://gist.github.com/peteredhead/985fe42d319a474c584b96e1f5a2da39.js"></script>
+        <p>This results in the output below. I’ve added a slider to represent the alpha angle, for those on desktops or laptops.</p>
+        <div id="viewer">
+            <div id="container">
+                <div class="first square">Mix</div><div class="second square">Bass</div><div class="third square">Cajon</div><div class="fourth square">Ukulele</div><div class="first square">Mix</div>
+            </div>
+        </div>
+        <input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="move(this.value)" onchange="move(this.value)">
+        <h4>HTML5 - AudioContext</h4>
+        <p>Now that the orientation of the device can be captured and put to use, it’s time to look at the audio side of things. For this, we’ll use the AudioContext interface.</p>
+        <p>Why not just use the HTML audio element? Well, in theory it does everything required. It plays audio, it loops and the volume can be controlled via script. However, it sucks. The looping inserts a gap between each iteration and multiple instances drift over time (unless you do some fudging my periodically resetting the play positions). Plus it’s possible to do way more using AudioContext, which makes it easier to extend beyond a simple example.</p>
+        <p>The way AudioContext works is via an audio-processing graph. (Anyone who has used GNURadio will be familiar with this concept). There are audio sources (microphones, input  files), audio sinks (speakers, output files) and a bunch of processing nodes in between (gains, filters, compressors, etc).</p>
+        <p>Here’s the setup that will be used for this demonstration:</p>
+        <img src="images/audiocontext.png" alt="Audio Context Graph"/>
+        <p>There are four audio sources: the ukulele track, the double bass track, the cajon track and the mixed audio. Each one of these will be loaded asynchronously via XMLHTTPRequest into an audio buffer node.</p>
+        <p>Each audio source is connected to its own gain node. The gain nodes will be used to independently vary the volume of each track (depending on which way the device is facing).</p>
+        <p>Finally all four gain nodes are connected to the audio destination. In this case it will be the device’s speakers (or headphones if connected).</p>
+        <p><a href="examples/2-audio.html" target="_blank">Here’s a quick example with all four tracks being loaded and played together.</a></p>    
+        <h4>Controlling the Gains</h4>
+        <p>The final step is to use the device orientation data to control the gains of the four audio tracks.</p>
+        <img src="images/soundfield.png" alt="sound field" />
+        <p>Each audio track will be at its maximum at the angles shown in the diagram above and will be muted at +/- 90&deg; from this angle. At the angle which is the midpoint between two tracks, both tracks will be at half volume.</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>&alpha;</th>
+              <th>Mix</th>
+              <th>Ukulele</th>
+              <th>Double Bass</th>
+              <th>Cajon</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0&deg;</td>
+              <td>100%</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>0%</td>
+            </tr>
+            <tr>
+              <td>45&deg;</td>
+              <td>50%</td>
+              <td>50%</td>
+              <td>0%</td>
+              <td>0%</td>
+            </tr>
+            <tr>
+              <td>90&deg;</td>
+              <td>0%</td>
+              <td>100%</td>
+              <td>0%</td>
+              <td>0%</td>
+            </tr>
+            <tr>
+              <td>135&deg;</td>   
+              <td>0%</td>
+              <td>50%</td>
+              <td>50%</td>
+              <td>0%</td>
+            </tr>
+            <tr>
+              <td>180&deg;</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>100%</td>
+              <td>0%</td>
+            </tr>
+            <tr>
+              <td>225&deg;</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>50%</td>
+              <td>50%</td>
+            </tr>
+            <tr>
+              <td>270&deg;</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>100%</td>
+            </tr>
+            <tr>
+              <td>315&deg;</td>
+              <td>50%</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>50%</td>
+            </tr>
+            <tr>
+              <td>360&deg;</td>
+              <td>100%</td>
+              <td>0%</td>
+              <td>0%</td>
+              <td>0%</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Rather than use tables, the gains can be calculated mathematically.</p>
+        <p>If &phi; is the angle over which the track is audible (in our case 180&deg;), &theta; is the position of the track in the diagram above and &alpha; is the orientation of the device, then the gain (<em>g</em>) can be calculated using the equation <em>g</em> = ( &phi; - &verbar; &theta; - &alpha; &verbar; ) / &phi;</p>
+        <p>This formula will result in negative values for <em>g</em> -  these need to be set to zero. There is also special case for the track at 0&deg;; any angles of α above 270&deg; will contribute to this gain level. Taking all this into account, the updateGains function can be written as the following.</p>
+        <script src="https://gist.github.com/peteredhead/f5a7172e9519b3a798b29d3c23a55021.js"></script>
+        <p>The deviceOrientationListener needs updating to update the gains whenever the device is moved.</p>
+        <script src="https://gist.github.com/peteredhead/d78452000dbff9bfb79b15822e31c8a7.js"></script>
+        <p>And that’s all there is to it. The completed demonstration is available here.</p>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
+    <!-- Tether for Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

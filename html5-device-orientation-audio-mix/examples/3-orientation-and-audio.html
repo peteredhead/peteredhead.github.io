@@ -1,0 +1,145 @@
+<html>
+<head>
+    <title>Audio Mixing using Device Orientation</title>
+    <script>
+        var files_loaded = 0;
+        var sources = [];
+        var gainNodes = [];
+        var instruments = ['mix', 'cajon', 'doublebass', 'ukulele'];
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        var context = new AudioContext();
+        
+        function init() {
+            if (window.DeviceOrientationEvent) {
+			    window.addEventListener("deviceorientation", deviceOrientationListener);
+		    } else {
+			    alert("Sorry, your browser doesn't support Device Orientation");
+		    }
+            for (var i in instruments) {
+                sources[i] = context.createBufferSource();
+                gainNodes[i] = context.createGain();
+                sources[i].connect(gainNodes[i]);
+                gainNodes[i].connect(context.destination);
+            }
+            loadNext();
+        }
+
+        function loadNext() {
+            if (files_loaded == sources.length) {
+                play();
+                return;
+            }
+            var request = new XMLHttpRequest();
+            var instrument = instruments[files_loaded];
+            console.log("Loading 'audio/" + instrument + ".m4a'")
+            request.open('GET', 'audio/' + instrument + '.m4a', true);
+            request.responseType = 'arraybuffer';
+            request.onload = function() {
+                console.log(request.response);
+                context.decodeAudioData(request.response, function(response) {
+                    sources[files_loaded].buffer = response;
+                    sources[files_loaded].loop = true;
+                    files_loaded += 1;
+                    loadNext()
+                });
+            }
+            request.send();
+        }
+
+        function play() {
+            for (var i in sources) {
+                sources[i].start(0);
+            }
+        }
+
+		function deviceOrientationListener(event) {
+			var alpha = event.alpha;
+			updateGains(alpha);
+			move(alpha);
+		}
+		
+		function manualUpdate(angle) {
+		    updateGains(angle);
+		    move(angle);
+		}
+		
+		
+		function updateGains(value) {
+		    var gain0 = (90 - Math.abs(0 - value)) / 90;
+		    if (gain0 < 0) gain0 = 0;
+		    var gain1 = (90 - Math.abs(90 - value)) / 90;
+		    if (gain1 < 0) gain1 = 0;
+		    var gain2 = (90 - Math.abs(180 - value))/90;
+		    if (gain2 < 0) gain2 = 0;
+		    var gain3 = (90 - Math.abs(270 - value)) / 90;
+		    if (gain3 < 0) gain3 = 0;
+		    var gain4 = (90 - Math.abs(360 - value)) / 90;
+		    if (gain4 > 0) gain0 = gain4;
+		    gainNodes[0].gain.value = gain0;
+		    gainNodes[1].gain.value = gain1;
+		    gainNodes[2].gain.value = gain2;
+		    gainNodes[3].gain.value = gain3;
+		    console.log("Angle: "+value+", Gains: "+gain0+", "+gain1+", "+gain2+", "+gain3)
+		}
+
+		function move(value) {
+			var container = document.getElementById("container");
+			var right = 800 - (value / 360) * 800;
+			container.style.right = right + "px";
+		}
+    </script>
+    <style>
+		#viewer {
+			width: 200px;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+		}
+		
+		#container {
+			position: relative;
+			color: white;
+			font-family: helvetica, arial;
+			font-weight: bold;
+			text-shadow: 1px 1px #666;
+			text-align: center;
+			width: 1000px;
+			height: 200px;
+			margin: 0;
+			padding: 0;
+		}
+		
+		.square {
+			width: 200px;
+			height: 200px;
+			display: inline-block;
+			margin: 0;
+			padding-top: 80px;
+		}
+		
+		.first {
+			background-color: red;
+		}
+		
+		.second {
+			background-color: yellow;
+		}
+		
+		.third {
+			background-color: green;
+		}
+		
+		.fourth {
+			background-color: blue;
+		}
+	</style>
+</head>
+<body onLoad="init()">
+	<div id="viewer">
+		<div id="container">
+			<div class="first square">Mix</div><div class="second square">Ukulele</div><div class="third square">Bass</div><div class="fourth square">Cajon</div><div class="first square">Mix</div>
+		</div>
+	</div>
+	<input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="manualUpdate(this.value)" onchange="manualUpdate(this.value)">
+</body>
+</html>

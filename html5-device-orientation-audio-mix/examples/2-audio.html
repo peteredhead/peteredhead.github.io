@@ -1,0 +1,50 @@
+<html>
+<head>
+    <title>Audio Mixing using Device Orientation</title>
+    <script>
+        var files_loaded = 0;
+        var sources = [];
+        var instruments = ['cajon', 'doublebass', 'ukulele'];
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        var context = new AudioContext();
+        
+        function init() {
+            for (var i in instruments) {
+                sources[i] = context.createBufferSource();
+                sources[i].connect(context.destination);
+            }
+            loadNext();
+        }
+
+        function loadNext() {
+            if (files_loaded == sources.length) {
+                play();
+                return;
+            }
+            var request = new XMLHttpRequest();
+            var instrument = instruments[files_loaded];
+            console.log("Loading 'audio/" + instrument + ".m4a'")
+            request.open('GET', 'audio/' + instrument + '.m4a', true);
+            request.responseType = 'arraybuffer';
+            request.onload = function() {
+                console.log(request.response);
+                context.decodeAudioData(request.response, function(response) {
+                    sources[files_loaded].buffer = response;
+                    sources[files_loaded].loop = true;
+                    files_loaded += 1;
+                    loadNext()
+                });
+            }
+            request.send();
+        }
+
+        function play() {
+            for (var i in sources) {
+                sources[i].start(0);
+            }
+        }
+    </script>
+</head>
+<body onLoad="init()">
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Audio Mixing using Device Orientation</title>
+	<style>
+		#viewer {
+			width: 200px;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+		}
+		
+		#container {
+			position: relative;
+			color: white;
+			font-family: helvetica, arial;
+			font-weight: bold;
+			text-shadow: 1px 1px #666;
+			text-align: center;
+			width: 1000px;
+			height: 200px;
+			margin: 0;
+			padding: 0;
+		}
+		
+		.square {
+			width: 200px;
+			height: 200px;
+			display: inline-block;
+			margin: 0;
+			padding-top: 80px;
+		}
+		
+		.first {
+			background-color: red;
+		}
+		
+		.second {
+			background-color: yellow;
+		}
+		
+		.third {
+			background-color: green;
+		}
+		
+		.fourth {
+			background-color: blue;
+		}
+	</style>
+	<script>
+		if (window.DeviceOrientationEvent) {
+			window.addEventListener("deviceorientation", deviceOrientationListener);
+		}
+		else {
+			alert("Sorry, your browser doesn't support Device Orientation");
+		}
+
+		function deviceOrientationListener(event) {
+			var alpha = event.alpha;
+			move(alpha);
+		}
+
+		function move(value) {
+			var container = document.getElementById("container");
+			var right = 800 - (value / 360) * 800;
+			container.style.right = right + "px";
+		}
+	</script>
+</head>
+
+<body>
+	<div id="viewer">
+		<div id="container">
+			<div class="first square">Mix</div><div class="second square">Bass</div><div class="third square">Cajon</div><div class="fourth square">Ukulele</div><div class="first square">Mix</div>
+		</div>
+	</div>
+	<input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="move(this.value)" onchange="move(this.value)">
+</body>
+
+</html>
