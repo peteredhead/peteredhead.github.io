@@ -89,7 +89,7 @@
 
 <body>
     <nav class="navbar navbar-dark bg-inverse">
-        <a class="navbar-brand" href="#">peteredhead.github.io</a>
+        <a class="navbar-brand" href="/">peteredhead.github.io</a>
     </nav>
     <div class="jumbotron">
         <div class="container">
@@ -124,6 +124,8 @@
             </div>
         </div>
         <input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="move(this.value)" onchange="move(this.value)">
+        <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/1-orientation.html" target="_blank">View source</a>
+        <br />
         <h4>HTML5 - AudioContext</h4>
         <p>Now that the orientation of the device can be captured and put to use, it’s time to look at the audio side of things. For this, we’ll use the AudioContext interface.</p>
         <p>Why not just use the HTML audio element? Well, in theory it does everything required. It plays audio, it loops and the volume can be controlled via script. However, it sucks. The looping inserts a gap between each iteration and multiple instances drift over time (unless you do some fudging my periodically resetting the play positions). Plus it’s possible to do way more using AudioContext, which makes it easier to extend beyond a simple example.</p>
@@ -133,7 +135,8 @@
         <p>There are four audio sources: the ukulele track, the double bass track, the cajon track and the mixed audio. Each one of these will be loaded asynchronously via XMLHTTPRequest into an audio buffer node.</p>
         <p>Each audio source is connected to its own gain node. The gain nodes will be used to independently vary the volume of each track (depending on which way the device is facing).</p>
         <p>Finally all four gain nodes are connected to the audio destination. In this case it will be the device’s speakers (or headphones if connected).</p>
-        <p><a href="examples/2-audio.html" target="_blank">Here’s a quick example with all four tracks being loaded and played together.</a></p>    
+        <p><a href="examples/2-audio.html" target="_blank">Here’s a quick example with all four tracks being loaded and played together.</a>
+            - <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/2-audio.html" target="_blank">View source.</a></p>    
         <h4>Controlling the Gains</h4>
         <p>The final step is to use the device orientation data to control the gains of the four audio tracks.</p>
         <img src="images/soundfield.png" alt="sound field" />
@@ -220,7 +223,7 @@
         <script src="https://gist.github.com/peteredhead/f5a7172e9519b3a798b29d3c23a55021.js"></script>
         <p>The deviceOrientationListener needs updating to update the gains whenever the device is moved.</p>
         <script src="https://gist.github.com/peteredhead/d78452000dbff9bfb79b15822e31c8a7.js"></script>
-        <p>And that’s all there is to it. The completed demonstration is available here.</p>
+        <p>And that’s all there is to it. <a href="examples/3-orientation-and-audio.html" target="_blank">The completed demonstration is available here.</a> - <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/3-orientation-and-audio.html" target="_blank">View source.</a></p>
     </div>
 
 
