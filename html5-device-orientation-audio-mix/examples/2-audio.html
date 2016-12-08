@@ -8,6 +8,11 @@
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var context = new AudioContext();
         
+        function debug(message) {
+            var debug = document.getElementById('debug');
+            debug.innerHTML += message + "<br />";
+        }
+        
         function init() {
             for (var i in instruments) {
                 sources[i] = context.createBufferSource();
@@ -18,16 +23,16 @@
 
         function loadNext() {
             if (files_loaded == sources.length) {
+                debug("All files loaded.");
                 play();
                 return;
             }
             var request = new XMLHttpRequest();
             var instrument = instruments[files_loaded];
-            console.log("Loading 'audio/" + instrument + ".m4a'")
+            debug("Loading 'audio/" + instrument + ".m4a'")
             request.open('GET', 'audio/' + instrument + '.m4a', true);
             request.responseType = 'arraybuffer';
             request.onload = function() {
-                console.log(request.response);
                 context.decodeAudioData(request.response, function(response) {
                     sources[files_loaded].buffer = response;
                     sources[files_loaded].loop = true;
@@ -39,6 +44,7 @@
         }
 
         function play() {
+            debug("Playing...");
             for (var i in sources) {
                 sources[i].start(0);
             }
@@ -46,5 +52,6 @@
     </script>
 </head>
 <body onLoad="init()">
+    <div id="debug"></div>
 </body>
 </html>
