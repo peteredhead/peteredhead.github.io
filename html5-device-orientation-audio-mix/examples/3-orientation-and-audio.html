@@ -9,6 +9,11 @@
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var context = new AudioContext();
         
+        function debug(message) {
+            var debug = document.getElementById('debug');
+            debug.innerHTML += message + "<br />";
+        }
+        
         function init() {
             if (window.DeviceOrientationEvent) {
 			    window.addEventListener("deviceorientation", deviceOrientationListener);
@@ -26,12 +31,13 @@
 
         function loadNext() {
             if (files_loaded == sources.length) {
+            	debug("All files loaded.");
                 play();
                 return;
             }
             var request = new XMLHttpRequest();
             var instrument = instruments[files_loaded];
-            console.log("Loading 'audio/" + instrument + ".m4a'")
+            debug("Loading 'audio/" + instrument + ".m4a'")
             request.open('GET', 'audio/' + instrument + '.m4a', true);
             request.responseType = 'arraybuffer';
             request.onload = function() {
@@ -47,6 +53,7 @@
         }
 
         function play() {
+        	debug("Playing...");
             for (var i in sources) {
                 sources[i].start(0);
             }
@@ -79,7 +86,6 @@
 		    gainNodes[1].gain.value = gain1;
 		    gainNodes[2].gain.value = gain2;
 		    gainNodes[3].gain.value = gain3;
-		    console.log("Angle: "+value+", Gains: "+gain0+", "+gain1+", "+gain2+", "+gain3)
 		}
 
 		function move(value) {
@@ -89,6 +95,14 @@
 		}
     </script>
     <style>
+    	#left {
+    		width: 400px;
+    		float: left;
+    	}
+    	#right {
+    		width: 400px;
+    		float: right;
+    	}
 		#viewer {
 			width: 200px;
 			overflow: hidden;
@@ -135,11 +149,16 @@
 	</style>
 </head>
 <body onLoad="init()">
-	<div id="viewer">
-		<div id="container">
-			<div class="first square">Mix</div><div class="second square">Ukulele</div><div class="third square">Bass</div><div class="fourth square">Cajon</div><div class="first square">Mix</div>
+	<div id="left">
+		<div id="viewer">
+			<div id="container">
+				<div class="first square">Mix</div><div class="second square">Ukulele</div><div class="third square">Bass</div><div class="fourth square">Cajon</div><div class="first square">Mix</div>
+			</div>
 		</div>
+		<input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="manualUpdate(this.value)" onchange="manualUpdate(this.value)">
 	</div>
-	<input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="manualUpdate(this.value)" onchange="manualUpdate(this.value)">
+	<div id="right">
+		<div id="debug" />
+	</div>
 </body>
 </html>
