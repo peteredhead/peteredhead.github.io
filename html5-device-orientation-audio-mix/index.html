@@ -6,12 +6,13 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Bungee" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Patrick+Hand" rel="stylesheet">
     <style>
         /* Page Stuff */
         
         h1 {
-            font-family: 'Patrick Hand', cursive;
+            font-family: 'Bungee', arial;
         }
         
         h4 {
@@ -99,10 +100,10 @@
     </div>
     <div class="container">
         <h4>Background</h4>
-        <p>Recently I’ve been doing a lot of work with 360 video. One of the things that really makes 360 work well on mobile devices is the ability to use the device’s gyroscopes to automatically adjust the orientation of the video. This got me thinking
+        <p>Recently I’ve been doing a lot of work with 360 video. One of the things that really makes 360 work well on mobiles is the ability to use the device’s gyroscopes to automatically adjust the orientation of the video. This got me thinking
             of other applications for this technology.</p>
-        <p>Given that I’m more from a sound background, than video, I decided to investigate how the orientation of the device could be used to mix different audio sources. Using my old <a href="https://www.youtube.com/watch?v=3AOJdajG6w8" target="_blank">ukulele, double-bass and cajon cover of Get Lucky</a>            as a source, I’m going to allow the user to hear each instrument in turn or the whole mix depending on which direction the device is facing.</p>
-        <p>For those of you who just want to see the finished code, it's <a href="examples/3-orientation-and-audio.html" target="_blank">here</a>.</p>
+        <p>Given that I’m more from a sound background than video, I decided to investigate how the orientation of the device could be used to mix different audio sources. Using my old <a href="https://www.youtube.com/watch?v=3AOJdajG6w8" target="_blank">ukulele, double-bass and cajon cover of Get Lucky</a>            as a source, I’m going to allow the user to hear each instrument in turn or the whole mix depending on which direction the device is facing.</p>
+        <p>For those of you who just want to see the finished result, it's <a href="examples/3-orientation-and-audio.html" target="_blank">here</a>.</p>
         <h4>HTML5 - Device Orientation</h4>
         <p>Determining which direction a phone or tablet is facing is ridiculously easy in HTML5. The Device Orientation event is triggered whenever the accelerometer detects movement. By registering a function as a listener to this event, we can get updated
             every time the device orientation changes.</p>
@@ -123,12 +124,12 @@
                 <div class="first square">Mix</div><div class="second square">Bass</div><div class="third square">Cajon</div><div class="fourth square">Ukulele</div><div class="first square">Mix</div>
             </div>
         </div>
-        <input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="move(this.value)" onchange="move(this.value)">
-        <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/1-orientation.html" target="_blank">View source</a>
+        <input type="range" id="slider" min="0" value="0" max="360" step="1" oninput="move(this.value)" onchange="move(this.value)"><br />
+        <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/1-orientation.html" target="_blank">[source]</a>
         <br />
         <h4>HTML5 - AudioContext</h4>
-        <p>Now that the orientation of the device can be captured and put to use, it’s time to look at the audio side of things. For this, we’ll use the AudioContext interface.</p>
-        <p>Why not just use the HTML audio element? Well, in theory it does everything required. It plays audio, it loops and the volume can be controlled via script. However, it sucks. The looping inserts a gap between each iteration and multiple instances drift over time (unless you do some fudging my periodically resetting the play positions). Plus it’s possible to do way more using AudioContext, which makes it easier to extend beyond a simple example.</p>
+        <p>Now that the orientation of the device can be captured and put to use, it’s time to look at the audio side of things. For this we’ll use the AudioContext interface.</p>
+        <p>Why not just use the HTML audio element? Well, in theory it does everything required. It plays audio, it loops and the volume can be controlled via script. However, it sucks. The looping inserts a gap between each iteration and multiple instances drift over time (unless you do some fudging by periodically resetting the play positions). Plus it’s possible to do way more using AudioContext, which makes it easier to extend beyond a simple example.</p>
         <p>The way AudioContext works is via an audio-processing graph. (Anyone who has used GNURadio will be familiar with this concept). There are audio sources (microphones, input  files), audio sinks (speakers, output files) and a bunch of processing nodes in between (gains, filters, compressors, etc).</p>
         <p>Here’s the setup that will be used for this demonstration:</p>
         <img src="images/audiocontext.png" alt="Audio Context Graph"/>
@@ -136,7 +137,7 @@
         <p>Each audio source is connected to its own gain node. The gain nodes will be used to independently vary the volume of each track (depending on which way the device is facing).</p>
         <p>Finally all four gain nodes are connected to the audio destination. In this case it will be the device’s speakers (or headphones if connected).</p>
         <p><a href="examples/2-audio.html" target="_blank">Here’s a quick example with all four tracks being loaded and played together.</a>
-            - <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/2-audio.html" target="_blank">View source.</a></p>    
+            - <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/2-audio.html" target="_blank">[source]</a></p>    
         <h4>Controlling the Gains</h4>
         <p>The final step is to use the device orientation data to control the gains of the four audio tracks.</p>
         <img src="images/soundfield.png" alt="sound field" />
@@ -218,12 +219,13 @@
           </tbody>
         </table>
         <p>Rather than use tables, the gains can be calculated mathematically.</p>
-        <p>If &phi; is the angle over which the track is audible (in our case 180&deg;), &theta; is the position of the track in the diagram above and &alpha; is the orientation of the device, then the gain (<em>g</em>) can be calculated using the equation <em>g</em> = ( &phi; - &verbar; &theta; - &alpha; &verbar; ) / &phi;</p>
+        <p>If &phi; is the angle from the max volume to the point the track mutes (in our case 90&deg;), &theta; is the position of the track in the diagram above and &alpha; is the orientation of the device, then the gain (<em>g</em>) can be calculated using the equation <em>g</em> = ( &phi; - &verbar; &theta; - &alpha; &verbar; ) / &phi;</p>
         <p>This formula will result in negative values for <em>g</em> -  these need to be set to zero. There is also special case for the track at 0&deg;; any angles of α above 270&deg; will contribute to this gain level. Taking all this into account, the updateGains function can be written as the following.</p>
         <script src="https://gist.github.com/peteredhead/f5a7172e9519b3a798b29d3c23a55021.js"></script>
         <p>The deviceOrientationListener needs updating to update the gains whenever the device is moved.</p>
         <script src="https://gist.github.com/peteredhead/d78452000dbff9bfb79b15822e31c8a7.js"></script>
-        <p>And that’s all there is to it. <a href="examples/3-orientation-and-audio.html" target="_blank">The completed demonstration is available here.</a> - <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/3-orientation-and-audio.html" target="_blank">View source.</a></p>
+        <p>And that’s all there is to it. <a href="examples/3-orientation-and-audio.html" target="_blank">The completed demonstration is available here.</a> - <a href="https://github.com/peteredhead/peteredhead.github.io/blob/master/html5-device-orientation-audio-mix/examples/3-orientation-and-audio.html" target="_blank">[source]</a></p>
+        <p>Clearly it works better on mobile devices, so here's a shorter link to type in: <a href="http://tinyurl.com/hu75v2b" target="_blank">http://tinyurl.com/hu75v2b</a>
     </div>
 
 
